@@ -75,8 +75,36 @@ st.markdown("""
     font-size: 0.66rem; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.6px; color: #64748b; margin-bottom: 5px;
   }
-  .kpi-value { font-size: 2rem; font-weight: 800; color: #1e293b; line-height: 1; }
+  .kpi-card.blue   .kpi-value { color: #2563eb; }
+  .kpi-card.green  .kpi-value { color: #16a34a; }
+  .kpi-card.red    .kpi-value { color: #dc2626; }
+  .kpi-card.amber  .kpi-value { color: #d97706; }
+  .kpi-card.purple .kpi-value { color: #7c3aed; }
+  .kpi-value { font-size: 2rem; font-weight: 800; line-height: 1; }
   .kpi-sub   { font-size: 0.72rem; color: #94a3b8; margin-top: 5px; }
+
+  /* Progress bar rows */
+  .prog-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:0.78rem; }
+  .prog-label { width:148px; flex-shrink:0; color:#334155; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .prog-bar-wrap { flex:1; background:#f1f5f9; border-radius:6px; height:18px; overflow:hidden; }
+  .prog-bar { height:100%; border-radius:6px; display:flex; align-items:center; justify-content:flex-end; padding-right:6px; font-size:0.69rem; font-weight:700; color:white; }
+  .prog-num { width:22px; text-align:right; font-weight:700; color:#1e293b; font-size:0.78rem; }
+
+  /* Stop tab styled boxes */
+  .cause-box { background:#fee2e2; border-radius:10px; padding:12px 14px; margin-bottom:10px; }
+  .cause-box .ct { font-size:0.72rem; color:#dc2626; font-weight:700; margin-bottom:4px; }
+  .cause-box .cn { font-size:1.5rem; font-weight:800; color:#dc2626; }
+  .info-box { background:#fef9ec; border-radius:10px; padding:12px 14px; border-left:4px solid #f59e0b; margin-bottom:14px; }
+  .info-box .it { font-size:0.77rem; color:#92400e; font-weight:700; margin-bottom:4px; }
+  .info-box .id { font-size:0.74rem; color:#78350f; }
+
+  /* Market tags in table */
+  .tag { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.7rem; font-weight:600; }
+  .tag-red   { background:#fee2e2; color:#dc2626; }
+  .tag-blue  { background:#dbeafe; color:#2563eb; }
+  .tag-amber { background:#fef3c7; color:#d97706; }
+  .tag-gray  { background:#f1f5f9; color:#64748b; }
+  .tag-green { background:#dcfce7; color:#16a34a; }
 
   /* Chart cards */
   .chart-card {
@@ -339,38 +367,47 @@ with tab1:
 
     c5, c6, c7 = st.columns(3)
     with c5:
-        st.markdown('<div class="chart-card"><div class="chart-card-title">🔵 Top กลุ่มสินค้า (จำนวนสินค้า)</div>', unsafe_allow_html=True)
-        grp_df = all_products.groupby('group').size().reset_index(name='count').sort_values('count')
-        fig5 = px.bar(grp_df, x='count', y='group', orientation='h',
-                      color='count', color_continuous_scale='Blues')
-        fig5.update_layout(height=320, margin=dict(l=0,r=0,t=4,b=0),
-                           plot_bgcolor='white', paper_bgcolor='white',
-                           showlegend=False, coloraxis_showscale=False,
-                           font=dict(family="Segoe UI, sans-serif"))
-        st.plotly_chart(fig5, use_container_width=True)
+        st.markdown('<div class="chart-card"><div class="chart-card-title">🔵 Top กลุ่มสินค้า (Plan New)</div>', unsafe_allow_html=True)
+        grp_df = all_products.groupby('group').size().reset_index(name='count').sort_values('count', ascending=False)
+        max_cnt = grp_df['count'].max()
+        bar_colors = ['#2563eb','#0d9488','#16a34a','#16a34a','#16a34a','#d97706','#d97706','#dc2626','#7c3aed','#64748b']
+        bars_html = ''
+        for i, row in grp_df.iterrows():
+            pct = int(row['count'] / max_cnt * 100)
+            color = bar_colors[min(i, len(bar_colors)-1)]
+            bars_html += f'''<div class="prog-row">
+              <div class="prog-label">{row["group"]}</div>
+              <div class="prog-bar-wrap"><div class="prog-bar" style="width:{pct}%;background:{color};">{row["count"]}</div></div>
+              <div class="prog-num">{int(row["count"])}</div>
+            </div>'''
+        st.markdown(bars_html, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
     with c6:
-        st.markdown('<div class="chart-card"><div class="chart-card-title">🟢 สัดส่วนตามตลาด</div>', unsafe_allow_html=True)
+        st.markdown('<div class="chart-card"><div class="chart-card-title">🟢 สัดส่วนตามตลาด (Plan New)</div>', unsafe_allow_html=True)
         mkt_df = all_products.groupby('market').size().reset_index(name='count')
         fig6 = go.Figure(go.Pie(
             labels=mkt_df['market'], values=mkt_df['count'],
             hole=0.55, marker_colors=px.colors.qualitative.Set2
         ))
-        fig6.update_layout(height=320, margin=dict(l=0,r=0,t=4,b=0),
-                           paper_bgcolor='white', font=dict(family="Segoe UI, sans-serif"))
+        fig6.update_layout(
+            height=340, margin=dict(l=0,r=0,t=4,b=0),
+            paper_bgcolor='white', font=dict(family="Segoe UI, sans-serif"),
+            annotations=[dict(text=f"<b>{total_all}</b><br>รายการ", x=0.5, y=0.5,
+                              font_size=16, showarrow=False)]
+        )
         st.plotly_chart(fig6, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
     with c7:
-        st.markdown('<div class="chart-card"><div class="chart-card-title">🟦 New vs Level Up ตามตลาด</div>', unsafe_allow_html=True)
+        st.markdown('<div class="chart-card"><div class="chart-card-title">🟦 ผลิตภัณฑ์ตามตลาด — สัดส่วน New vs Level Up</div>', unsafe_allow_html=True)
         nv = all_products[all_products['type']=='New'].groupby('market').size().reset_index(name='new')
         lv = all_products[all_products['type']=='Level Up'].groupby('market').size().reset_index(name='lv')
-        mv = pd.merge(nv, lv, on='market', how='outer').fillna(0)
+        mv = pd.merge(nv, lv, on='market', how='outer').fillna(0).sort_values('new', ascending=False)
         fig7 = go.Figure()
         fig7.add_bar(x=mv['market'], y=mv['new'], name="New",      marker_color="#2563eb")
         fig7.add_bar(x=mv['market'], y=mv['lv'],  name="Level Up", marker_color="#0d9488")
-        fig7.update_layout(barmode="stack", height=320, margin=dict(l=0,r=0,t=4,b=0),
+        fig7.update_layout(barmode="stack", height=340, margin=dict(l=0,r=0,t=4,b=0),
                            plot_bgcolor='white', paper_bgcolor='white',
                            legend=dict(orientation="h", y=1.12),
                            font=dict(family="Segoe UI, sans-serif"))
@@ -453,52 +490,85 @@ with tab2:
 # TAB 3 — STOPPED PRODUCTS
 # ════════════════════════════════════════
 with tab3:
-    st.markdown("### 🛑 สินค้าหยุดพัฒนานอกแผน")
-
     export_count = len(stop_df[stop_df['market'] == 'Export'])
-    non7_pma20   = len(stop_df[stop_df['market'].isin(['non-7','PMA20'])])
+    non7_count   = len(stop_df[stop_df['market'] == 'non-7'])
+    pma20_count  = len(stop_df[stop_df['market'] == 'PMA20'])
 
-    s1, s2, s3, s4 = st.columns(4)
-    s1.metric("ทั้งหมด",       f"{len(stop_df)} รายการ")
-    s2.metric("นอกแผน",        f"{len(stop_df)} (100%)")
-    s3.metric("Export",        f"{export_count} รายการ")
-    s4.metric("non-7 / PMA20", f"{non7_pma20} รายการ")
-    st.divider()
+    # Filters
+    mkt_filter = st.radio("Filter ตลาด", ["ทั้งหมด","Export","non-7","PMA20"], horizontal=True)
+    stop_filtered = stop_df if mkt_filter == "ทั้งหมด" else stop_df[stop_df['market'] == mkt_filter]
 
-    sc1, sc2 = st.columns(2)
-    with sc1:
-        st.markdown("**หยุดพัฒนาแยกตามกลุ่ม**")
-        sg = stop_df.groupby('group').size().reset_index(name='count').sort_values('count')
-        fig_sg = px.bar(sg, x='count', y='group', orientation='h',
-                        color='count', color_continuous_scale=[[0,'#d97706'],[1,'#dc2626']])
-        fig_sg.update_layout(height=200, margin=dict(l=0,r=0,t=10,b=0),
-                             showlegend=False, coloraxis_showscale=False)
-        st.plotly_chart(fig_sg, use_container_width=True)
+    left_col, right_col = st.columns([5, 3])
 
-    with sc2:
-        st.markdown("**หยุดพัฒนาแยกตามเดือน**")
+    with left_col:
+        # Market tag color map
+        tag_map = {'Export':'tag-blue','non-7':'tag-amber','PMA20':'tag-gray'}
+        month_tag = {'Jan':'tag-blue','Apr':'tag-red','May':'tag-amber'}
+
+        # Build table HTML
+        rows_html = ''
+        for i, row in enumerate(stop_filtered.to_dict('records'), 1):
+            mkt_cls = tag_map.get(row['market'], 'tag-gray')
+            mon_cls = month_tag.get(row['month'], 'tag-gray')
+            rows_html += f"""<tr>
+              <td style="color:#94a3b8;font-size:0.75rem;">{i}</td>
+              <td style="font-size:0.78rem;">{row['group']}</td>
+              <td><span class="tag {mkt_cls}">{row['market']}</span></td>
+              <td style="font-size:0.75rem;color:#64748b;">{row['customer']}</td>
+              <td style="font-size:0.78rem;font-weight:500;">{row['name']}</td>
+              <td><span class="tag {mon_cls}">{row['month']}</span></td>
+              <td><span class="tag tag-red" style="white-space:nowrap;">ราคา RM สูง</span></td>
+            </tr>"""
+
+        st.markdown(f"""
+        <div class="chart-card">
+          <div class="chart-card-title">🔴 รายการสินค้าหยุดพัฒนานอกแผน</div>
+          <div style="overflow-x:auto;max-height:480px;overflow-y:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:0.78rem;">
+              <thead>
+                <tr style="background:#f1f5f9;position:sticky;top:0;">
+                  <th style="padding:8px 10px;text-align:left;font-size:0.7rem;color:#475569;text-transform:uppercase;">#</th>
+                  <th style="padding:8px 10px;text-align:left;font-size:0.7rem;color:#475569;text-transform:uppercase;">กลุ่มสินค้า</th>
+                  <th style="padding:8px 10px;text-align:left;font-size:0.7rem;color:#475569;text-transform:uppercase;">ตลาด</th>
+                  <th style="padding:8px 10px;text-align:left;font-size:0.7rem;color:#475569;text-transform:uppercase;">ลูกค้า</th>
+                  <th style="padding:8px 10px;text-align:left;font-size:0.7rem;color:#475569;text-transform:uppercase;">ชื่อสินค้า</th>
+                  <th style="padding:8px 10px;text-align:left;font-size:0.7rem;color:#475569;text-transform:uppercase;">เดือน</th>
+                  <th style="padding:8px 10px;text-align:left;font-size:0.7rem;color:#475569;text-transform:uppercase;">สาเหตุหลัก</th>
+                </tr>
+              </thead>
+              <tbody>{rows_html}</tbody>
+            </table>
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with right_col:
         sm = stop_df.groupby('month').size().reset_index(name='count')
         fig_sm = go.Figure(go.Pie(
-            labels=sm['month'].apply(lambda m: f"{m} ({sm[sm['month']==m]['count'].values[0]})"),
+            labels=[f"{r['month']} ({r['count']})" for _, r in sm.iterrows()],
             values=sm['count'],
             hole=0.5,
             marker_colors=['#93c5fd','#dc2626','#d97706']
         ))
-        fig_sm.update_layout(height=200, margin=dict(l=0,r=0,t=10,b=0))
-        st.plotly_chart(fig_sm, use_container_width=True)
+        fig_sm.update_layout(height=220, margin=dict(l=0,r=0,t=4,b=0),
+                             paper_bgcolor='white', font=dict(family="Segoe UI, sans-serif"),
+                             legend=dict(orientation="v"))
 
-    st.markdown("**รายการสินค้า**")
-    mkt_filter = st.radio("Filter ตลาด", ["ทั้งหมด","Export","non-7","PMA20"], horizontal=True)
-    stop_filtered = stop_df if mkt_filter == "ทั้งหมด" else stop_df[stop_df['market'] == mkt_filter]
-    st.dataframe(
-        stop_filtered.rename(columns={
-            'group':'กลุ่มสินค้า','market':'ตลาด','customer':'ลูกค้า',
-            'name':'ชื่อสินค้า','month':'เดือน','plan_type':'ประเภท',
-            'cause':'สาเหตุ','reason':'เหตุผล'
-        }),
-        use_container_width=True, hide_index=True, height=400
-    )
-    st.info("💰 สาเหตุหลักของทุกรายการ: **ราคา RM สูง ทำให้ราคาขายสูง** → Mer / ลูกค้าขอยกเลิก")
+        st.markdown(f"""
+        <div class="chart-card">
+          <div class="chart-card-title">🟠 สาเหตุการหยุดพัฒนา &amp; รายละเอียด</div>
+          <div class="cause-box">
+            <div class="ct">Mer / ลูกค้าขอยกเลิก</div>
+            <div class="cn">{len(stop_df)} <span style="font-size:0.78rem;font-weight:600;">รายการ (100%)</span></div>
+          </div>
+          <div class="info-box">
+            <div class="it">💰 ราคา RM สูง → ราคาขายสูง</div>
+            <div class="id">เป็นสาเหตุหลักของสินค้าทั้ง {len(stop_df)} รายการ ทำให้ลูกค้าและ Mer ขอยกเลิกการพัฒนา</div>
+          </div>
+          <div style="font-size:0.77rem;font-weight:700;color:#334155;margin-bottom:8px;">ช่วงเวลาที่หยุด</div>
+        </div>
+        """, unsafe_allow_html=True)
+        st.plotly_chart(fig_sm, use_container_width=True)
 
 # ════════════════════════════════════════
 # TAB 4 — ADD NEW PRODUCT
