@@ -29,18 +29,66 @@ if 'extra_products' not in st.session_state:
 # ── CSS ───────────────────────────────────────────────────────
 st.markdown("""
 <style>
-  .kpi-box {
+  /* Hide default Streamlit top padding */
+  .block-container { padding-top: 0 !important; }
+  header[data-testid="stHeader"] { display: none; }
+
+  /* Dashboard header */
+  .dash-header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+    color: white;
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 2px 12px rgba(37,99,235,0.3);
+    margin-bottom: 20px;
+  }
+  .dash-header h1 { font-size: 1.3rem; font-weight: 700; margin: 0; }
+  .dash-header .sub { font-size: 0.8rem; opacity: 0.8; margin-top: 3px; }
+  .dash-badge {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  /* KPI cards */
+  .kpi-card {
     background: white;
-    border-radius: 12px;
+    border-radius: 14px;
+    padding: 16px 18px 13px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    border-top: 4px solid transparent;
+    margin-bottom: 4px;
+    height: 110px;
+  }
+  .kpi-card.blue   { border-top-color: #2563eb; }
+  .kpi-card.green  { border-top-color: #16a34a; }
+  .kpi-card.red    { border-top-color: #dc2626; }
+  .kpi-card.amber  { border-top-color: #d97706; }
+  .kpi-card.purple { border-top-color: #7c3aed; }
+  .kpi-label {
+    font-size: 0.66rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.6px; color: #64748b; margin-bottom: 5px;
+  }
+  .kpi-value { font-size: 2rem; font-weight: 800; color: #1e293b; line-height: 1; }
+  .kpi-sub   { font-size: 0.72rem; color: #94a3b8; margin-top: 5px; }
+
+  /* Chart cards */
+  .chart-card {
+    background: white;
+    border-radius: 14px;
     padding: 16px 18px;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
-    border-top: 4px solid #2563eb;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
     margin-bottom: 4px;
   }
-  .kpi-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.6px; }
-  .kpi-value { font-size: 2rem; font-weight: 800; color: #1e293b; margin: 4px 0; }
-  .kpi-sub   { font-size: 0.73rem; color: #94a3b8; }
-  .section-title { font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+  .chart-card-title {
+    font-size: 0.84rem; font-weight: 700; color: #1e293b; margin-bottom: 12px;
+  }
 </style>
 """, unsafe_allow_html=True)
 
@@ -171,9 +219,15 @@ if st.session_state.extra_products:
 stop_df = pd.DataFrame(STOP_PRODUCTS)
 
 # ── Header ───────────────────────────────────────────────────
-st.markdown("## 📊 RTE 2026 — Product Development Dashboard")
-st.caption("7-11 & Non 7-11 · ข้อมูล ณ เดือน พฤษภาคม 2026")
-st.divider()
+st.markdown("""
+<div class="dash-header">
+  <div>
+    <h1>📊 RTE 2026 — Product Development Dashboard</h1>
+    <div class="sub">7-11 &amp; Non 7-11 · ข้อมูล ณ เดือน พฤษภาคม 2026</div>
+  </div>
+  <div class="dash-badge">Jan – Apr 2026</div>
+</div>
+""", unsafe_allow_html=True)
 
 total_all = len(all_products)
 total_new = len(all_products[all_products['type'] == 'New'])
@@ -190,18 +244,41 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # TAB 1 — OVERVIEW
 # ════════════════════════════════════════
 with tab1:
-    k1, k2, k3, k4, k5 = st.columns(5)
-    k1.metric("สินค้าพัฒนาทั้งหมด", total_all,     "Jan–Apr 2026")
-    k2.metric("% Success New",       "100%",        "ขายได้ครบทุกตัว")
-    k3.metric("หยุดพัฒนานอกแผน",    len(stop_df),  "ส่วนใหญ่ Apr (+8)")
-    k4.metric("Delay Plan",          int(all_products['delay'].sum()), "")
-    k5.metric("ยอดขายสะสม",          f"{all_products['total_sales'].sum()/1e6:.0f}M บาท", "ณ เมษายน")
-
-    st.divider()
+    delay_count = int(all_products['delay'].sum())
+    total_sales_m = all_products['total_sales'].sum() / 1e6
+    st.markdown(f"""
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px;">
+      <div class="kpi-card blue">
+        <div class="kpi-label">สินค้าพัฒนาทั้งหมด</div>
+        <div class="kpi-value">{total_all}</div>
+        <div class="kpi-sub">Jan–Apr 2026</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">% Success New</div>
+        <div class="kpi-value">100%</div>
+        <div class="kpi-sub">ขายได้ครบทุกตัว</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label">หยุดพัฒนานอกแผน</div>
+        <div class="kpi-value">{len(stop_df)}</div>
+        <div class="kpi-sub">ส่วนใหญ่ Apr (+8)</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">Delay Plan</div>
+        <div class="kpi-value">{delay_count}</div>
+        <div class="kpi-sub">สินค้าที่เลื่อนแผน</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-label">ยอดขายสะสม</div>
+        <div class="kpi-value">{total_sales_m:.0f}M</div>
+        <div class="kpi-sub">บาท ณ เมษายน</div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     c1, c2 = st.columns(2)
     with c1:
-        st.markdown("**Plan vs Sold New — รายเดือน**")
+        st.markdown('<div class="chart-card"><div class="chart-card-title">🔵 Plan vs Sold New — รายเดือน</div>', unsafe_allow_html=True)
         p_vals = plan_new[:]
         s_vals = sold_new[:]
         if st.session_state.extra_products:
@@ -213,70 +290,92 @@ with tab1:
         fig = go.Figure()
         fig.add_bar(x=MONTHS, y=p_vals, name="Plan New", marker_color="#2563eb")
         fig.add_bar(x=MONTHS, y=s_vals, name="Sold New", marker_color="#93c5fd")
-        fig.update_layout(barmode="group", height=260, margin=dict(l=0,r=0,t=10,b=0),
-                          legend=dict(orientation="h", y=1.1))
+        fig.update_layout(barmode="group", height=250, margin=dict(l=0,r=0,t=4,b=0),
+                          plot_bgcolor='white', paper_bgcolor='white',
+                          legend=dict(orientation="h", y=1.12),
+                          font=dict(family="Segoe UI, sans-serif"))
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with c2:
-        st.markdown("**% Success New — รายเดือน**")
+        st.markdown('<div class="chart-card"><div class="chart-card-title">🟢 % Success New — รายเดือน</div>', unsafe_allow_html=True)
         fig2 = go.Figure()
         fig2.add_scatter(x=MONTHS, y=success_pct, mode="lines+markers",
                          fill="tozeroy", line_color="#16a34a",
-                         fillcolor="rgba(22,163,74,0.12)", name="% Success")
-        fig2.update_layout(height=260, margin=dict(l=0,r=0,t=10,b=0),
-                           yaxis=dict(range=[0,120], ticksuffix="%"))
+                         fillcolor="rgba(22,163,74,0.12)", name="% Success",
+                         marker=dict(size=8))
+        fig2.update_layout(height=250, margin=dict(l=0,r=0,t=4,b=0),
+                           plot_bgcolor='white', paper_bgcolor='white',
+                           yaxis=dict(range=[0,120], ticksuffix="%"),
+                           showlegend=False, font=dict(family="Segoe UI, sans-serif"))
         st.plotly_chart(fig2, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     c3, c4 = st.columns(2)
     with c3:
-        st.markdown("**ยอดขายสะสม (ล้านบาท) — รายเดือน**")
+        st.markdown('<div class="chart-card"><div class="chart-card-title">🟣 ยอดขายสะสม (ล้านบาท) — รายเดือน</div>', unsafe_allow_html=True)
         fig3 = go.Figure()
         fig3.add_scatter(x=MONTHS[:4], y=sales_m[:4], mode="lines+markers",
                          fill="tozeroy", line_color="#7c3aed",
-                         fillcolor="rgba(124,58,237,0.10)", name="ยอดขาย")
-        fig3.update_layout(height=260, margin=dict(l=0,r=0,t=10,b=0),
-                           yaxis=dict(ticksuffix="M"))
+                         fillcolor="rgba(124,58,237,0.10)", name="ยอดขาย",
+                         marker=dict(size=8))
+        fig3.update_layout(height=250, margin=dict(l=0,r=0,t=4,b=0),
+                           plot_bgcolor='white', paper_bgcolor='white',
+                           yaxis=dict(ticksuffix="M"),
+                           showlegend=False, font=dict(family="Segoe UI, sans-serif"))
         st.plotly_chart(fig3, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with c4:
-        st.markdown("**สินค้าหยุดพัฒนานอกแผน — รายเดือน**")
+        st.markdown('<div class="chart-card"><div class="chart-card-title">🔴 สินค้าหยุดพัฒนานอกแผน — รายเดือน</div>', unsafe_allow_html=True)
         colors = ["#dc2626" if v>5 else "#d97706" if v>0 else "#e2e8f0" for v in stop_unplan]
         fig4 = go.Figure()
         fig4.add_bar(x=MONTHS, y=stop_unplan, marker_color=colors, name="หยุดพัฒนา")
-        fig4.update_layout(height=260, margin=dict(l=0,r=0,t=10,b=0), showlegend=False)
+        fig4.update_layout(height=250, margin=dict(l=0,r=0,t=4,b=0),
+                           plot_bgcolor='white', paper_bgcolor='white',
+                           showlegend=False, font=dict(family="Segoe UI, sans-serif"))
         st.plotly_chart(fig4, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     c5, c6, c7 = st.columns(3)
     with c5:
-        st.markdown("**Top กลุ่มสินค้า (จำนวนสินค้า)**")
+        st.markdown('<div class="chart-card"><div class="chart-card-title">🔵 Top กลุ่มสินค้า (จำนวนสินค้า)</div>', unsafe_allow_html=True)
         grp_df = all_products.groupby('group').size().reset_index(name='count').sort_values('count')
         fig5 = px.bar(grp_df, x='count', y='group', orientation='h',
                       color='count', color_continuous_scale='Blues')
-        fig5.update_layout(height=320, margin=dict(l=0,r=0,t=10,b=0),
-                           showlegend=False, coloraxis_showscale=False)
+        fig5.update_layout(height=320, margin=dict(l=0,r=0,t=4,b=0),
+                           plot_bgcolor='white', paper_bgcolor='white',
+                           showlegend=False, coloraxis_showscale=False,
+                           font=dict(family="Segoe UI, sans-serif"))
         st.plotly_chart(fig5, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with c6:
-        st.markdown("**สัดส่วนตามตลาด**")
+        st.markdown('<div class="chart-card"><div class="chart-card-title">🟢 สัดส่วนตามตลาด</div>', unsafe_allow_html=True)
         mkt_df = all_products.groupby('market').size().reset_index(name='count')
         fig6 = go.Figure(go.Pie(
             labels=mkt_df['market'], values=mkt_df['count'],
             hole=0.55, marker_colors=px.colors.qualitative.Set2
         ))
-        fig6.update_layout(height=320, margin=dict(l=0,r=0,t=10,b=0))
+        fig6.update_layout(height=320, margin=dict(l=0,r=0,t=4,b=0),
+                           paper_bgcolor='white', font=dict(family="Segoe UI, sans-serif"))
         st.plotly_chart(fig6, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with c7:
-        st.markdown("**New vs Level Up ตามตลาด**")
+        st.markdown('<div class="chart-card"><div class="chart-card-title">🟦 New vs Level Up ตามตลาด</div>', unsafe_allow_html=True)
         nv = all_products[all_products['type']=='New'].groupby('market').size().reset_index(name='new')
         lv = all_products[all_products['type']=='Level Up'].groupby('market').size().reset_index(name='lv')
         mv = pd.merge(nv, lv, on='market', how='outer').fillna(0)
         fig7 = go.Figure()
         fig7.add_bar(x=mv['market'], y=mv['new'], name="New",      marker_color="#2563eb")
         fig7.add_bar(x=mv['market'], y=mv['lv'],  name="Level Up", marker_color="#0d9488")
-        fig7.update_layout(barmode="stack", height=320, margin=dict(l=0,r=0,t=10,b=0),
-                           legend=dict(orientation="h", y=1.1))
+        fig7.update_layout(barmode="stack", height=320, margin=dict(l=0,r=0,t=4,b=0),
+                           plot_bgcolor='white', paper_bgcolor='white',
+                           legend=dict(orientation="h", y=1.12),
+                           font=dict(family="Segoe UI, sans-serif"))
         st.plotly_chart(fig7, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # ════════════════════════════════════════
 # TAB 2 — ALL PRODUCTS
