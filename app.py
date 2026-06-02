@@ -44,100 +44,145 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ── Base Data ─────────────────────────────────────────────────
+# ── Monthly stats (from Excel %success sheet) ─────────────────
+MONTHLY_STATS = {
+    'Jan': {'plan_new': 14, 'plan_lv': 8,  'sold_new': 14, 'sold_lv': 8,  'stop_unplan': 1},
+    'Feb': {'plan_new': 11, 'plan_lv': 6,  'sold_new': 11, 'sold_lv': 6,  'stop_unplan': 0},
+    'Mar': {'plan_new': 10, 'plan_lv': 12, 'sold_new': 10, 'sold_lv': 12, 'stop_unplan': 0},
+    'Apr': {'plan_new': 10, 'plan_lv': 5,  'sold_new': 10, 'sold_lv': 5,  'stop_unplan': 8},
+}
+
 MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
 plan_new    = [14, 11, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0]
 sold_new    = [14, 11, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0]
 success_pct = [100,100,100,100, 0, 0, 0, 0, 0, 0, 0, 0]
-stop_unplan = [1,  0,  0,  8,  0, 0, 0, 0, 0, 0, 0, 0]
+stop_unplan = [1,   0,  0,  8,  0, 0, 0, 0, 0, 0, 0, 0]
 sales_m     = [66.19, 135.88, 298.51, 429.18, 0, 0, 0, 0, 0, 0, 0, 0]
 
+# ── Base Data (76 products from Excel) ───────────────────────
 BASE_PRODUCTS = [
-  dict(no=1,  group='ข้าวเหนียว สเต็ก',      market='PMA08', quarter='Q1', month='Jan', code='90113352', name='BGข.น.เนื้อลาบแซ่บEZYGO137g',         type='New',     cm=29.29, alpha=100,  defect=0,    delay=False, sales_jan=4022504,  sales_feb=2879629, sales_mar=1896352, sales_apr=1064995),
-  dict(no=2,  group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q1', month='Jan', code='90113351', name='ชีสซี่เบอร์เกอร์ไก่ทอดEZYGO142g',      type='New',     cm=25.31, alpha=89.4, defect=0,    delay=False, sales_jan=5503870,  sales_feb=4687381, sales_mar=3878403, sales_apr=3344298),
-  dict(no=3,  group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q1', month='Jan', code='90113348', name='เบอร์เกอร์ไก่EZYGO101g phase2',         type='New',     cm=34.95, alpha=100,  defect=0.12, delay=False, sales_jan=2760860,  sales_feb=1461202, sales_mar=1492843, sales_apr=975489),
-  dict(no=4,  group='สลัด ยำ น้ำจิ้ม',       market='PMA16', quarter='Q1', month='Jan', code='90138875', name='สลัดปูอัดเเละเซเลอรีตราอีซี่เฟรช210g', type='New',     cm=18.38, alpha=94,   defect=0,    delay=False, sales_jan=15037920, sales_feb=9982080, sales_mar=6558520, sales_apr=3778886),
-  dict(no=5,  group='ข้าวเหนียว สเต็ก',      market='PMA08', quarter='Q1', month='Jan', code='90113350', name='BGข.น.ไก่ย่างEZYGO136g LV2026',         type='LevelUp', cm=42.91, alpha=100,  defect=0.11, delay=False, sales_jan=2077608,  sales_feb=1670208, sales_mar=723725,  sales_apr=482878),
-  dict(no=6,  group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q1', month='Jan', code='90113356', name='เบอร์เกอร์ไก่ย่างและชีสEZYGO105g',      type='New',     cm=34.32, alpha=100,  defect=0,    delay=False, sales_jan=1817667,  sales_feb=2117417, sales_mar=763756,  sales_apr=0),
-  dict(no=7,  group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q1', month='Jan', code='90113349', name='เบอร์เกอร์กุ้งชีส(ผสมไก่)EZYGO102g',    type='New',     cm=31.25, alpha=100,  defect=0,    delay=False, sales_jan=4603385,  sales_feb=2061592, sales_mar=0,       sales_apr=0),
-  dict(no=8,  group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Jan', code='90113353', name='ขนมจีบหมูอีซี่โก 75g (4 ชิ้น)',         type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=9,  group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Jan', code='90113354', name='ซาลาเปาหมูสับอีซี่โก 72g (2 ชิ้น)',     type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=10, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Jan', code='90113355', name='ติ่มซำกุ้งอีซี่โก 70g (3 ชิ้น)',        type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=11, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Jan', code='90113357', name='ฮะเก๋าอีซี่โก 66g (3 ชิ้น)',            type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=12, group='เบอร์เกอร์ รองท้อง',    market='PMA02', quarter='Q1', month='Jan', code='90113358', name='เบอร์เกอร์ไก่ทอด PMA02 2026',           type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=13, group='ข้าวปั้น เครื่องเคียง', market='PMA19', quarter='Q1', month='Jan', code='90113359', name='ข้าวปั้นสามเหลี่ยมไก่เทอริยากิ',        type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=14, group='ข้าวและกับข้าว',        market='PMA19', quarter='Q1', month='Jan', code='90113360', name='ข้าวกะเพราไก่ไข่ดาว PMA19',             type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=15, group='กับข้าว',               market='PMA19', quarter='Q1', month='Feb', code='90113361', name='แกงเขียวหวานไก่ PMA19',                 type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=16, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Feb', code='90113362', name='บะหมี่เกี๊ยวกุ้ง อีซี่โก',              type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=17, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Feb', code='90113363', name='ซาลาเปาไส้ถั่วแดง อีซี่โก',             type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=18, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Feb', code='90113364', name='ขนมจีบกุ้ง อีซี่โก',                    type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=19, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Feb', code='90113365', name='ซาลาเปาไส้ BBQ อีซี่โก',                type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=20, group='ข้าวเหนียว สเต็ก',      market='PMA08', quarter='Q1', month='Feb', code='90113366', name='BGข.น.หมูย่างEZYGO LV2026',              type='LevelUp', cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=21, group='ข้าวเหนียว สเต็ก',      market='PMA08', quarter='Q1', month='Feb', code='90113367', name='BGสเต็กหมูEZYGO LV2026',                 type='LevelUp', cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=22, group='ข้าวปั้น เครื่องเคียง', market='PMA19', quarter='Q1', month='Feb', code='90113368', name='ข้าวปั้นสามเหลี่ยมทูน่ามายองเนส',       type='LevelUp', cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=23, group='ข้าวและกับข้าว',        market='PMA19', quarter='Q1', month='Feb', code='90113369', name='ข้าวผัดกระเพราหมูสับ PMA19',             type='LevelUp', cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=24, group='กับข้าว',               market='PMA06', quarter='Q1', month='Feb', code='90113370', name='ต้มยำกุ้ง PMA06',                       type='LevelUp', cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=25, group='เส้น (ข้าวไทย)',        market='PMA20', quarter='Q2', month='Mar', code='90113371', name='ผัดไทยกุ้งสด PMA20',                    type='New',     cm=0,     alpha=100,  defect=0,    delay=True,  sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=26, group='เส้น (ข้าวไทย)',        market='PMA20', quarter='Q2', month='Mar', code='90113372', name='ข้าวผัดปูอัด PMA20',                    type='New',     cm=0,     alpha=100,  defect=0,    delay=True,  sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=27, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q2', month='Mar', code='90113373', name='ติ่มซำรวมมิตร อีซี่โก',                 type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=28, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q2', month='Mar', code='90113374', name='ซาลาเปาหมูสับชีส อีซี่โก',              type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=29, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q2', month='Mar', code='90113375', name='ขนมปังซาวโดว์ไก่อบ PMA24',              type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=30, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q2', month='Mar', code='90113376', name='ขนมปังซาวโดว์ทูน่า PMA24',              type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=31, group='ข้าวเหนียว สเต็ก',      market='PMA08', quarter='Q2', month='Mar', code='90113377', name='BGข.น.ปลาหมึกย่างEZYGO',                type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=32, group='ข้าวเหนียว สเต็ก',      market='PMA08', quarter='Q2', month='Mar', code='90113378', name='BGข.น.หมูกรอบEZYGO LV2026',             type='LevelUp', cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=33, group='กับข้าว',               market='PMA19', quarter='Q2', month='Mar', code='90113379', name='ผัดกระเพราเนื้อไข่ดาว PMA19',           type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=34, group='ข้าวและกับข้าว',        market='PMA19', quarter='Q2', month='Mar', code='90113380', name='ข้าวหมูทอดกระเทียม PMA19',              type='LevelUp', cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=35, group='ติ่มซำ (นึ่ง)',          market='Export',quarter='Q2', month='Apr', code='EXP-001',  name='Chicken Dim Sum Export',                type='New',     cm=0,     alpha=100,  defect=0,    delay=True,  sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=36, group='ติ่มซำ (นึ่ง)',          market='Export',quarter='Q2', month='Apr', code='EXP-002',  name='Shrimp Har Gow Export',                 type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=37, group='ติ่มซำ (นึ่ง)',          market='Export',quarter='Q2', month='Apr', code='EXP-003',  name='Pork Siu Mai Export',                   type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=38, group='เส้น (ข้าวไทย)',        market='PMA20', quarter='Q2', month='Apr', code='90113381', name='ก๋วยเตี๋ยวคั่วไก่ PMA20',              type='New',     cm=0,     alpha=100,  defect=0,    delay=True,  sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=39, group='ข้าวปั้น เครื่องเคียง', market='PMA19', quarter='Q2', month='Apr', code='90113382', name='ข้าวปั้นซีอิ๊วไข่หวาน PMA19',          type='LevelUp', cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=40, group='ข้าวและกับข้าว',        market='PMA19', quarter='Q2', month='Apr', code='90113383', name='ข้าวแกงกะหรี่ไก่ PMA19',               type='LevelUp', cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=41, group='กับข้าว',               market='PMA19', quarter='Q2', month='Apr', code='90113384', name='ต้มข่าไก่ PMA19',                       type='LevelUp', cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=42, group='เส้น (แป้งสาลี) ซุป',  market='PMA20', quarter='Q2', month='Apr', code='90113385', name='ราเม็งซุปมิโซะ PMA20',                  type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=43, group='ติ่มซำ รองท้อง (ทอด)', market='non-7', quarter='Q2', month='Apr', code='non7-001', name='ทอดมันกุ้ง non-7',                      type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=44, group='ติ่มซำ (นึ่ง)',          market='non-7', quarter='Q2', month='Apr', code='non7-002', name='ติ่มซำรวมมิตร non-7',                  type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
-  dict(no=45, group='ข้าวและกับข้าว',        market='PMA22', quarter='Q2', month='Apr', code='90113386', name='ข้าวหน้าเป็ด PMA22',                    type='New',     cm=0,     alpha=100,  defect=0,    delay=False, sales_jan=0, sales_feb=0, sales_mar=0, sales_apr=0),
+  dict(no=1,  group='ข้าวเหนียว สเต็ก',      market='PMA08', quarter='Q1', month='Jan', code='90113352', name='BGข.น.เนื้อลาบแซ่บEZYGO137gIMP267-11',                     type='Level Up', alpha=100.0,  defect=0.0,  cm=29.29, cm_request=30.33, delay=False, sales_jan=4022504,  sales_feb=2879629,  sales_mar=1896352,  sales_apr=1064995),
+  dict(no=2,  group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q1', month='Jan', code='90113351', name='ชีสซี่เบอร์เกอร์ไก่ทอดEZYGO142gIMP2026',                    type='Level Up', alpha=89.4,   defect=0.0,  cm=25.31, cm_request=21.6,  delay=False, sales_jan=5503870,  sales_feb=4687381,  sales_mar=3878403,  sales_apr=3344298),
+  dict(no=3,  group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q1', month='Jan', code='90113348', name='เบอร์เกอร์ไก่EZYGO101g, 7-11 phase 2',                     type='Level Up', alpha=100.0,  defect=0.12, cm=34.95, cm_request=27.83, delay=False, sales_jan=2760860,  sales_feb=1461202,  sales_mar=1492843,  sales_apr=975489),
+  dict(no=4,  group='สลัด ยำ น้ำจิ้ม',       market='PMA16', quarter='Q1', month='Jan', code='90138875', name='สลัดปูอัดเเละเซเลอรี พร้อมน้ำสลัดซาวเออร์ เมโย่ ตราอีซี่เฟรช 210 กรัม', type='New',      alpha=94.0,   defect=0.0,  cm=18.38, cm_request=16.49, delay=False, sales_jan=15037920, sales_feb=9982080,  sales_mar=6558520,  sales_apr=3778886),
+  dict(no=5,  group='ข้าวเหนียว สเต็ก',      market='PMA08', quarter='Q1', month='Jan', code='90113350', name='BGข.น.ไก่ย่างEZYGO136gLV2026,7-11',                         type='New',      alpha=100.0,  defect=0.11, cm=42.91, cm_request=30.03, delay=False, sales_jan=2077608,  sales_feb=1670208,  sales_mar=723725,   sales_apr=482878),
+  dict(no=6,  group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q1', month='Jan', code='90113356', name='เบอร์เกอร์ไก่ย่างและชีสEZYGO105g,7-11',                    type='New',      alpha=100.0,  defect=0.0,  cm=34.32, cm_request=25.85, delay=False, sales_jan=1817667,  sales_feb=2117417,  sales_mar=763756,   sales_apr=0),
+  dict(no=7,  group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q1', month='Jan', code='90113349', name='เบอร์เกอร์กุ้งชีส(ผสมไก่)EZYGO102g,7-11',                  type='New',      alpha=100.0,  defect=0.0,  cm=31.25, cm_request=30.07, delay=False, sales_jan=4603385,  sales_feb=2061592,  sales_mar=0,        sales_apr=0),
+  dict(no=8,  group='เบอร์เกอร์ รองท้อง',    market='PMA02', quarter='Q1', month='Jan', code='90101418', name='เกี๊ยวหมึก(หมึกผสมหมู)ซีฟู้ด107g,7-11',                   type='New',      alpha=100.0,  defect=0.13, cm=20.64, cm_request=17.03, delay=False, sales_jan=6961712,  sales_feb=3298219,  sales_mar=2185595,  sales_apr=1617363),
+  dict(no=9,  group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Jan', code='90108256', name='JBBPไก่กุ้งไข่นกกระทาEZYGO110g,7-11',                      type='New',      alpha=100.0,  defect=0.21, cm=52.79, cm_request=40.82, delay=False, sales_jan=1624628,  sales_feb=1287205,  sales_mar=562597,   sales_apr=19),
+  dict(no=10, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Jan', code='90102093', name='สาหร่ายห่อหมูผสมไก่เนื้อปลาบดEZYGO69gคัพ',                type='New',      alpha=83.33,  defect=0.21, cm=20.65, cm_request=32.6,  delay=False, sales_jan=1446130,  sales_feb=2537560,  sales_mar=877397,   sales_apr=302588),
+  dict(no=11, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Jan', code='90108259', name='แรบบิทถั่วแดง ตรา อีซี่โก 50 กรัม, 7-11',                  type='New',      alpha=83.33,  defect=0.68, cm=42.26, cm_request=39.7,  delay=False, sales_jan=773560,   sales_feb=1187552,  sales_mar=811619,   sales_apr=547221),
+  dict(no=12, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Jan', code='90108254', name='เปาลาวาช็อกโกแลต ตรา อีซี่โก 80กรัม,7-11',                type='New',      alpha=100.0,  defect=0.0,  cm=30.48, cm_request=31.44, delay=False, sales_jan=568921,   sales_feb=1066129,  sales_mar=270317,   sales_apr=62483),
+  dict(no=13, group='กับข้าว',               market='PMA06', quarter='Q1', month='Jan', code='90139687', name='พะแนงหมู ตราเซเว่นเฟรช IMP2025',                           type='Level Up', alpha=100.0,  defect=0.0,  cm=41.69, cm_request=35.06, delay=False, sales_jan=652356,   sales_feb=662050,   sales_mar=801638,   sales_apr=928716),
+  dict(no=14, group='ข้าวปั้น เครื่องเคียง', market='PMA19', quarter='Q1', month='Jan', code='90138886', name='โอนิกิริซาบะย่างซีอิ๊ว 150g (big size)',                   type='New',      alpha=95.0,   defect=0.0,  cm=22.3,  cm_request=26.35, delay=False, sales_jan=101004,   sales_feb=107759,   sales_mar=7343377,  sales_apr=16597625),
+  dict(no=15, group='ข้าวและกับข้าว',        market='PMA19', quarter='Q1', month='Jan', code='90138889', name='ข้าวผัดผักรวมมิตร+ไก่ทอด 300 กรัม',                        type='New',      alpha=100.0,  defect=0.0,  cm=16.71, cm_request=35.37, delay=False, sales_jan=550997,   sales_feb=523285,   sales_mar=281467,   sales_apr=120671),
+  dict(no=16, group='ข้าวและกับข้าว',        market='PMA19', quarter='Q1', month='Jan', code='90138888', name='ข้าวแกงเขียวหวานไก่+หมูปั้นก้อนทอด 300 กรัม',              type='New',      alpha=100.0,  defect=0.0,  cm=23.69, cm_request=33.2,  delay=False, sales_jan=576432,   sales_feb=713559,   sales_mar=554583,   sales_apr=5334724),
+  dict(no=17, group='ข้าวและกับข้าว',        market='PMA19', quarter='Q1', month='Jan', code='90138898', name='ข้าวหอมมันปูกะเพราอกไก่ LV 2026 270 กรัม',                 type='Level Up', alpha=100.0,  defect=0.0,  cm=35.95, cm_request=25.39, delay=False, sales_jan=2594574,  sales_feb=9161702,  sales_mar=10239514, sales_apr=9493328),
+  dict(no=18, group='ข้าวและกับข้าว',        market='PMA19', quarter='Q1', month='Jan', code='90138896', name='ข้าวไรซ์เบอร์รี่ผสมข้าวหอมมะลิลาบอกไก่ LV 2026 270 กรัม', type='Level Up', alpha=100.0,  defect=0.0,  cm=31.94, cm_request=26.26, delay=False, sales_jan=2368040,  sales_feb=7604327,  sales_mar=8342388,  sales_apr=7360410),
+  dict(no=19, group='ข้าวและกับข้าว',        market='PMA19', quarter='Q1', month='Jan', code='90138899', name='ข้าวหอมมันปูอกไก่ย่างจิ้มแจ่ว LV 2026',                   type='Level Up', alpha=100.0,  defect=0.0,  cm=37.54, cm_request=30.16, delay=False, sales_jan=5558327,  sales_feb=11992220, sales_mar=12905062, sales_apr=12133213),
+  dict(no=20, group='กับข้าว',               market='PMA19', quarter='Q1', month='Jan', code='90138897', name='ต้มยำกุ้งน้ำข้น LV 2026 310 กรัม',                         type='Level Up', alpha=100.0,  defect=0.0,  cm=19.67, cm_request=20.52, delay=False, sales_jan=5304783,  sales_feb=7992490,  sales_mar=8679522,  sales_apr=8270337),
+  dict(no=21, group='ติ่มซำ (นึ่ง)',          market='Export',quarter='Q1', month='Jan', code='90140510', name='FZN BBQ Chicken Chick Buns',                                type='New',      alpha=93.33,  defect=0.36, cm=39.18, cm_request=44.96, delay=False, sales_jan=711486,   sales_feb=0,        sales_mar=0,        sales_apr=0),
+  dict(no=22, group='ติ่มซำ (นึ่ง)',          market='Export',quarter='Q1', month='Jan', code='90140509', name='FZN Sweet & Sour Hot Cross Buns',                           type='New',      alpha=95.24,  defect=0.71, cm=42.7,  cm_request=51.89, delay=False, sales_jan=577590,   sales_feb=0,        sales_mar=0,        sales_apr=0),
+  dict(no=23, group='ข้าวและกับข้าว',        market='PMA19', quarter='Q1', month='Feb', code='90138904', name='ข้าวกะเพราหมู LV 2026',                                    type='Level Up', alpha=100.0,  defect=0.0,  cm=46.2,  cm_request=35.88, delay=False, sales_jan=0,        sales_feb=13641147, sales_mar=37190709, sales_apr=40016069),
+  dict(no=24, group='กับข้าว',               market='PMA19', quarter='Q1', month='Feb', code='90138901', name='ไข่เจียวปู 270 กรัม',                                      type='New',      alpha=100.0,  defect=0.0,  cm=19.8,  cm_request=30.23, delay=False, sales_jan=0,        sales_feb=183183,   sales_mar=223369,   sales_apr=204),
+  dict(no=25, group='ข้าวและกับข้าว',        market='PMA19', quarter='Q1', month='Mar', code='90138911', name='ข้าวหมกไก่ 280 กรัม',                                      type='Level Up', alpha=100.0,  defect=0.0,  cm=24.08, cm_request=24.27, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=3797235,  sales_apr=12947612),
+  dict(no=26, group='ข้าวและกับข้าว',        market='PMA19', quarter='Q1', month='Mar', code='90138906', name='แกงส้มชะอมกุ้ง 310 กรัม',                                 type='Level Up', alpha=100.0,  defect=0.0,  cm=14.42, cm_request=18.73, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=7689311,  sales_apr=12157268),
+  dict(no=27, group='เส้น (ข้าวไทย)',        market='PMA19', quarter='Q1', month='Feb', code='90138903', name='ก๋วยเตี๋ยวคั่วไก่ 250 กรัม',                              type='New',      alpha=100.0,  defect=0.0,  cm=33.13, cm_request=30.02, delay=False, sales_jan=0,        sales_feb=5514646,  sales_mar=12418231, sales_apr=11629431),
+  dict(no=28, group='เส้น (ข้าวไทย)',        market='PMA20', quarter='Q1', month='Feb', code='90139663', name='ขนมจีนแกงเขียวหวานไก่ 290 กรัม',                          type='New',      alpha=100.0,  defect=0.0,  cm=31.76, cm_request=31.49, delay=False, sales_jan=0,        sales_feb=4354930,  sales_mar=2367257,  sales_apr=2624483),
+  dict(no=29, group='กับข้าว',               market='PMA06', quarter='Q1', month='Feb', code='90139689', name='ไก่สับคั่วพริกเกลือพร้อมกระเทียมเจียว62g',               type='New',      alpha=100.0,  defect=0.0,  cm=42.37, cm_request=37.02, delay=False, sales_jan=0,        sales_feb=487077,   sales_mar=733618,   sales_apr=497171),
+  dict(no=30, group='กับข้าว',               market='PMA20', quarter='Q1', month='Feb', code='90139674', name='แกงเห็ดรวมมิตร 225 กรัม IMP2026, Frozen',                 type='Level Up', alpha=100.0,  defect=0.0,  cm=35.09, cm_request=32.92, delay=False, sales_jan=0,        sales_feb=4024986,  sales_mar=6713483,  sales_apr=8036297),
+  dict(no=31, group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q1', month='Feb', code='90113354', name='เลิฟเวอร์BGไก่ทอดชีสEZYGO139g,7-11',                      type='New',      alpha=100.0,  defect=0.15, cm=32.18, cm_request=25.25, delay=False, sales_jan=0,        sales_feb=4512763,  sales_mar=1159764,  sales_apr=0),
+  dict(no=32, group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q1', month='Feb', code='90113357', name='BGกุ้งและไข่กุ้งEZYGO98g7-11IMP2026',                      type='Level Up', alpha=100.0,  defect=0.0,  cm=28.53, cm_request=29.65, delay=False, sales_jan=0,        sales_feb=2800165,  sales_mar=3233169,  sales_apr=2406599),
+  dict(no=33, group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q1', month='Feb', code='90113358', name='เบอร์เกอร์หมูEZGO93g(IMP2026,)7-11',                       type='Level Up', alpha=100.0,  defect=0.08, cm=35.01, cm_request=30.73, delay=False, sales_jan=0,        sales_feb=2002288,  sales_mar=12903828, sales_apr=14285232),
+  dict(no=34, group='ข้าวเหนียว สเต็ก',      market='PMA08', quarter='Q1', month='Feb', code='90113353', name='เบอร์เกอร์ข้าวเหนียวหมูย่างEZYGO141g7-11',                 type='New',      alpha=100.0,  defect=0.0,  cm=64.57, cm_request=36.65, delay=False, sales_jan=0,        sales_feb=3518368,  sales_mar=2029084,  sales_apr=985173),
+  dict(no=35, group='ข้าวเหนียว สเต็ก',      market='PMA22', quarter='Q1', month='Feb', code='90138905', name='ข้าวเหนียวไก่ย่างแดง อีซี่โก 170g, 7-11',                 type='New',      alpha=100.0,  defect=0.13, cm=27.69, cm_request=27.69, delay=False, sales_jan=0,        sales_feb=512010,   sales_mar=358015,   sales_apr=284820),
+  dict(no=36, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Feb', code='90108281', name='แรบบิทครีม ตรา อีซี่โก 60 กรัม,7-11 Lv26',                type='Level Up', alpha=100.0,  defect=0.42, cm=49.0,  cm_request=36.94, delay=False, sales_jan=0,        sales_feb=724593,   sales_mar=5126676,  sales_apr=5106241),
+  dict(no=37, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Feb', code='90108280', name='เปาเผือกโมจิ (ซาลาเปา) อีซี่โก 80g,7-11',                type='New',      alpha=100.0,  defect=0.52, cm=52.95, cm_request=39.89, delay=False, sales_jan=0,        sales_feb=896459,   sales_mar=2015552,  sales_apr=1281865),
+  dict(no=38, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Feb', code='90106013', name='ไก่นุ่มหน้ากุ้ง(ผสมหมู)EZYGO67g,7-11คัพ',                 type='New',      alpha=100.0,  defect=0.0,  cm=28.46, cm_request=28.18, delay=False, sales_jan=0,        sales_feb=3016074,  sales_mar=1797353,  sales_apr=778885),
+  dict(no=39, group='ข้าวปั้น เครื่องเคียง', market='PMA19', quarter='Q1', month='Feb', code='90138907', name='โอนิกิริไข่กุ้งมายองเนส 100 กรัม(LV2026)',                type='Level Up', alpha=100.0,  defect=0.0,  cm=52.09, cm_request=47.01, delay=False, sales_jan=0,        sales_feb=12169381, sales_mar=29670444, sales_apr=29722494),
+  dict(no=40, group='ติ่มซำ (นึ่ง)',          market='Export',quarter='Q1', month='Feb', code='90140505', name='Frozen Fully Steamed Gochujang Chicken Bun',                type='New',      alpha=100.0,  defect=0.0,  cm=62.0,  cm_request=55.84, delay=False, sales_jan=0,        sales_feb=3235200,  sales_mar=0,        sales_apr=0),
+  dict(no=41, group='ติ่มซำ (นึ่ง)',          market='Export',quarter='Q1', month='Feb', code='90140506', name='Frozen Fully Steamed Chicken Gyoza',                        type='New',      alpha=100.0,  defect=0.0,  cm=51.43, cm_request=57.69, delay=False, sales_jan=0,        sales_feb=1290914,  sales_mar=0,        sales_apr=0),
+  dict(no=42, group='ข้าวและกับข้าว',        market='PMA20', quarter='Q1', month='Mar', code='90139668', name='ข้าวกะเพรามังสวิรัติ 210 G IMP2026 CHB',                  type='Level Up', alpha=100.0,  defect=0.0,  cm=35.51, cm_request=35.45, delay=True,  sales_jan=0,        sales_feb=0,        sales_mar=4619790,  sales_apr=6089509),
+  dict(no=43, group='ข้าวปั้น เครื่องเคียง', market='PMA19', quarter='Q1', month='Mar', code='90138908', name='แคลิฟอร์เนียโรล 105 กรัม LV2026, Chilled',                type='Level Up', alpha=95.0,   defect=0.0,  cm=33.18, cm_request=31.92, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=5949100,  sales_apr=9320202),
+  dict(no=44, group='ข้าวปั้น เครื่องเคียง', market='PMA19', quarter='Q1', month='Mar', code='90138909', name='ซูชิเซ็ท 155 กรัม LV2026, Chilled',                       type='Level Up', alpha=100.0,  defect=0.0,  cm=31.71, cm_request=28.6,  delay=False, sales_jan=0,        sales_feb=0,        sales_mar=3672908,  sales_apr=13096653),
+  dict(no=45, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Mar', code='90101430', name='ขนมจีบกุ้งและขนมจีบหมูไข่เค็มEZYGO112g',                  type='New',      alpha=100.0,  defect=0.0,  cm=43.35, cm_request=38.84, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=1381716,  sales_apr=1887655),
+  dict(no=46, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Mar', code='90101429', name='ขนมจีบหมูผสมไก่450g7-11 Frozen',                           type='New',      alpha=100.0,  defect=0.0,  cm=53.59, cm_request=40.85, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=2291201,  sales_apr=1325912),
+  dict(no=47, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q1', month='Mar', code='90108284', name='แรบบิทฟักทอง ตรา อีซี่โก 50g,7-11',                       type='New',      alpha=83.33,  defect=0.42, cm=45.43, cm_request=36.99, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=735992,   sales_apr=761235),
+  dict(no=48, group='ข้าวเหนียว สเต็ก',      market='PMA08', quarter='Q1', month='Mar', code='90113366', name='BGข้าวเหนียวไก่ปลาร้า อีซี่โก 140g, 7-11',                type='New',      alpha=100.0,  defect=0.15, cm=28.1,  cm_request=31.11, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=2511029,  sales_apr=3623664),
+  dict(no=49, group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q1', month='Mar', code='90113360', name='เบอร์เกอร์หมูชีสและแฮมEZYGO126g,7-11',                    type='New',      alpha=100.0,  defect=0.0,  cm=27.06, cm_request=28.98, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=3914350,  sales_apr=2796272),
+  dict(no=50, group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q1', month='Mar', code='90113362', name='BGกุ้งย่างและชีส(ผสมไก่)EZYGO115g,7-11',                  type='New',      alpha=100.0,  defect=0.0,  cm=35.17, cm_request=32.57, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=2619028,  sales_apr=2429581),
+  dict(no=51, group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q1', month='Mar', code='90113363', name='เบอร์เกอร์ไก่ทอดชีสEZYGO143g,7-11',                       type='New',      alpha=100.0,  defect=0.16, cm=25.16, cm_request=26.97, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=571542,   sales_apr=3056553),
+  dict(no=52, group='ข้าวเหนียว สเต็ก',      market='PMA08', quarter='Q1', month='Mar', code='90113359', name='เจ๊แดงBGข้าวเหนียวหมูน้ำตก141gIMP26,7-11',                type='Level Up', alpha=100.0,  defect=0.1,  cm=58.83, cm_request=41.0,  delay=False, sales_jan=0,        sales_feb=-237,     sales_mar=2784168,  sales_apr=2185825),
+  dict(no=53, group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q1', month='Mar', code='90113361', name='เบอร์เกอร์กุ้งEZYGO93g,7-11IMP2026',                       type='Level Up', alpha=100.0,  defect=0.1,  cm=29.25, cm_request=28.57, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=5433350,  sales_apr=19814185),
+  dict(no=54, group='ข้าวเหนียว สเต็ก',      market='PMA22', quarter='Q1', month='Mar', code='90138912', name='ข้าวเหนียวหมูทอดอีซี่โก125gIMP26,7-11',                   type='Level Up', alpha=100.0,  defect=0.0,  cm=45.23, cm_request=39.55, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=12706191, sales_apr=16277561),
+  dict(no=55, group='ติ่มซำ (นึ่ง)',          market='Export',quarter='Q1', month='Mar', code='90140511', name='Frozen Fully Steamed Pork Bun (Conan) 100 g',               type='New',      alpha=87.5,   defect=1.33, cm=58.13, cm_request=55.97, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=896334,   sales_apr=0),
+  dict(no=56, group='เส้น (ข้าวไทย)',        market='PMA20', quarter='Q1', month='Mar', code='90139644', name='แจ่วฮ้อนหม่ำแซ่บ 170 g (ซุปเข้มข้น)',                    type='Level Up', alpha=100.0,  defect=0.0,  cm=30.71, cm_request=35.0,  delay=False, sales_jan=0,        sales_feb=0,        sales_mar=3259764,  sales_apr=4779534),
+  dict(no=57, group='เส้น (ข้าวไทย)',        market='PMA19', quarter='Q1', month='Mar', code='90138910', name='ผัดซีอิ๊วหมู 250g. LV 2026',                              type='Level Up', alpha=100.0,  defect=0.0,  cm=35.32, cm_request=31.34, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=26566532, sales_apr=43371499),
+  dict(no=58, group='เส้น (ข้าวไทย)',        market='PMA20', quarter='Q1', month='Mar', code='90139688', name='ขนมจีนน้ำยาป่าลูกชิ้นปลา 285 กรัม IMP2026',              type='Level Up', alpha=100.0,  defect=0.0,  cm=20.67, cm_request=14.3,  delay=False, sales_jan=0,        sales_feb=0,        sales_mar=2370986,  sales_apr=3259591),
+  dict(no=59, group='เส้น (แป้งสาลี) ซุป',  market='PMA20', quarter='Q1', month='Mar', code='90139639', name='เกี๊ยวน้ำหมู 190 กรัม IMP2025, Frozen',                   type='Level Up', alpha=100.0,  defect=0.0,  cm=44.44, cm_request=30.84, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=5400626,  sales_apr=10028358),
+  dict(no=60, group='เส้น (แป้งสาลี) ซุป',  market='non-7', quarter='Q1', month='Mar', code='90139672', name='สปาเก็ตตี้ไส้กรอกผัดพริกแห้ง, เดลิกาเซีย',               type='New',      alpha=100.0,  defect=0.0,  cm=59.51, cm_request=50.28, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=3600,     sales_apr=56400),
+  dict(no=61, group='ข้าวปั้น เครื่องเคียง', market='PMA19', quarter='Q1', month='Mar', code='90138877', name='สาหร่ายวากาเมะน้ำมันงา 55 กรัม, Chilled',                type='New',      alpha=100.0,  defect=0.0,  cm=31.46, cm_request=30.79, delay=True,  sales_jan=0,        sales_feb=0,        sales_mar=8482102,  sales_apr=8820224),
+  dict(no=62, group='ข้าวและกับข้าว',        market='PMA20', quarter='Q2', month='Apr', code='90139693', name='ข้าวไก่ย่างปลาร้าซอสจิ้มแจ่ว300g,IMP26',                 type='Level Up', alpha=100.0,  defect=0.0,  cm=21.31, cm_request=24.25, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=2243955,  sales_apr=3492065),
+  dict(no=63, group='กับข้าว',               market='PMA20', quarter='Q2', month='Apr', code='90139694', name='ซุปผักสไตล์ลาว 160 กรัม, Frozen',                         type='New',      alpha=100.0,  defect=0.0,  cm=36.62, cm_request=39.05, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=0,        sales_apr=8669782),
+  dict(no=64, group='ข้าวและกับข้าว',        market='PMA20', quarter='Q2', month='Apr', code='90139690', name='ข้าวกะเพราหมู 215 กรัม IMP2026',                          type='Level Up', alpha=100.0,  defect=0.0,  cm=42.1,  cm_request=35.22, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=0,        sales_apr=18582372),
+  dict(no=65, group='ข้าวเหนียว สเต็ก',      market='PMA08', quarter='Q2', month='Apr', code='90113364', name='BGข้าวเหนียวแหนมหมูทอด138g7-11',                          type='New',      alpha=100.0,  defect=0.0,  cm=39.77, cm_request=47.45, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=0,        sales_apr=3584141),
+  dict(no=66, group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q2', month='Apr', code='90113365', name='BGหมูทอดทงคัตสึและชีสEZYGO121g,7-11',                     type='New',      alpha=90.5,   defect=0.1,  cm=32.41, cm_request=33.98, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=0,        sales_apr=2837105),
+  dict(no=67, group='เบอร์เกอร์ รองท้อง',    market='PMA02', quarter='Q2', month='Apr', code='90138915', name='ไก่ย่างสูตรเผ็ดเดลิกาเซียเชสเตอร์90g7-11',               type='New',      alpha=90.0,   defect=0.23, cm=24.35, cm_request=17.15, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=0,        sales_apr=1856108),
+  dict(no=68, group='เบอร์เกอร์ รองท้อง',    market='PMA08', quarter='Q2', month='Apr', code='90113355', name='ดับเบิ้ลชีสเบอร์เกอร์หมูEZYGO131g,IMP26',                type='Level Up', alpha=100.0,  defect=0.0,  cm=24.88, cm_request=15.93, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=0,        sales_apr=7399346),
+  dict(no=69, group='ข้าวเหนียว สเต็ก',      market='PMA08', quarter='Q2', month='Apr', code='90113367', name='BGข้าวเหนียวจัมโบ้หมูปิ้ง180gIMP26,7-11',                type='Level Up', alpha=100.0,  defect=0.0,  cm=35.27, cm_request=39.06, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=1496738,  sales_apr=6958411),
+  dict(no=70, group='ติ่มซำ รองท้อง (ทอด)',  market='Export',quarter='Q2', month='Apr', code='90147032', name='Frozen Fully Fried Veggie Wonton 15g',                     type='New',      alpha=100.0,  defect=0.0,  cm=3.8,   cm_request=37.5,  delay=False, sales_jan=0,        sales_feb=0,        sales_mar=0,        sales_apr=502347),
+  dict(no=71, group='ติ่มซำ รองท้อง (ทอด)',  market='Export',quarter='Q2', month='Apr', code='90147032', name='Sweet & Sour Sauce 20 g',                                  type='New',      alpha=100.0,  defect=0.0,  cm=3.8,   cm_request=37.5,  delay=False, sales_jan=0,        sales_feb=0,        sales_mar=0,        sales_apr=0),
+  dict(no=72, group='เส้น (ข้าวไทย)',        market='PMA20', quarter='Q2', month='Apr', code='90139686', name='ผัดหมี่โคราช 200 กรัม',                                   type='New',      alpha=100.0,  defect=0.0,  cm=22.34, cm_request=31.42, delay=True,  sales_jan=0,        sales_feb=0,        sales_mar=0,        sales_apr=3755920),
+  dict(no=73, group='เส้น (ข้าวไทย)',        market='PMA19', quarter='Q2', month='Apr', code='90138913', name='เส้นใหญ่ราดหน้าหมูนุ่ม 395 กรัม',                        type='Level Up', alpha=100.0,  defect=0.0,  cm=34.61, cm_request=31.66, delay=True,  sales_jan=0,        sales_feb=0,        sales_mar=0,        sales_apr=1013890),
+  dict(no=74, group='ติ่มซำ (นึ่ง)',          market='non-7', quarter='Q2', month='Apr', code='90108275', name='ซาลาเปาลาวาโอวัลติน เจดดราก้อน444g,Makro',               type='New',      alpha=100.0,  defect=0.0,  cm=53.63, cm_request=50.23, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=0,        sales_apr=480473),
+  dict(no=75, group='ติ่มซำ (นึ่ง)',          market='non-7', quarter='Q2', month='Apr', code='90103091', name='ฮะเก๋ากุ้งชีส(ผสมปลาและหมู)เจด360g,Non-7',               type='New',      alpha=100.0,  defect=0.0,  cm=34.78, cm_request=38.05, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=0,        sales_apr=616593),
+  dict(no=76, group='ติ่มซำ (นึ่ง)',          market='PMA24', quarter='Q2', month='Apr', code='90108288', name='เปาจี่ผักโขมไก่ผสมแฮมและชีสEZYGO110g7-11',               type='New',      alpha=90.91,  defect=0.62, cm=37.41, cm_request=41.36, delay=False, sales_jan=0,        sales_feb=0,        sales_mar=0,        sales_apr=1273235),
 ]
 
+STOP_PRODUCTS = [
+  dict(group='ติ่มซำ รองท้อง (ทอด)', market='Export', customer='Ksiaa GmbH',            name='Tori Katsu',                   plan_type='นอกแผน', month='Jan', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
+  dict(group='เส้น (แป้งสาลี) ซุป',  market='PMA20',  customer='-',                     name='อุด้งหมูผัดกิมจิ 240 กรัม',  plan_type='นอกแผน', month='May', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
+  dict(group='ติ่มซำ รองท้อง (ทอด)', market='non-7',  customer='MAKRO',                 name='ซาโมซ่าไส้เผือก',             plan_type='นอกแผน', month='Apr', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
+  dict(group='ติ่มซำ รองท้อง (ทอด)', market='non-7',  customer='MAKRO',                 name='ซาโมซ่าไส้ครีมชีส',           plan_type='นอกแผน', month='Apr', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
+  dict(group='ติ่มซำ รองท้อง (ทอด)', market='non-7',  customer='MAKRO',                 name='ซาโมซ่าไส้เผือกโมจิ',         plan_type='นอกแผน', month='Apr', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
+  dict(group='ติ่มซำ รองท้อง (ทอด)', market='non-7',  customer='MAKRO',                 name='ซาโมซ่าไส้เผือกกล้วย',        plan_type='นอกแผน', month='Apr', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
+  dict(group='ติ่มซำ รองท้อง (ทอด)', market='Export', customer='Westbridge (TESCO)',    name='Banana Cinnamon Parcel',       plan_type='นอกแผน', month='Apr', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
+  dict(group='ติ่มซำ รองท้อง (ทอด)', market='Export', customer='Westbridge (TESCO)',    name='Tofu-Wrapped Prawn',           plan_type='นอกแผน', month='Apr', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
+  dict(group='ติ่มซำ รองท้อง (ทอด)', market='Export', customer='Westbridge (TESCO)',    name='Mango Sticky Rice Spring Roll',plan_type='นอกแผน', month='Apr', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
+  dict(group='ติ่มซำ รองท้อง (ทอด)', market='Export', customer='Westbridge for Aldi',   name='Crispy Stay Chicken Gyoza',   plan_type='นอกแผน', month='Apr', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
+]
+
+GROUP_LIST  = sorted(set(p['group'] for p in BASE_PRODUCTS)) + ['อื่นๆ']
+MARKET_LIST = sorted(set(p['market'] for p in BASE_PRODUCTS))
+
+# ── Build DataFrame ───────────────────────────────────────────
 all_products = pd.DataFrame(BASE_PRODUCTS)
 all_products['total_sales'] = all_products[['sales_jan','sales_feb','sales_mar','sales_apr']].sum(axis=1)
 
-# Merge extra products from session state
 if st.session_state.extra_products:
     extra_df = pd.DataFrame(st.session_state.extra_products)
+    for col in ['sales_jan','sales_feb','sales_mar','sales_apr']:
+        if col not in extra_df.columns:
+            extra_df[col] = 0
     extra_df['total_sales'] = extra_df[['sales_jan','sales_feb','sales_mar','sales_apr']].sum(axis=1)
     all_products = pd.concat([all_products, extra_df], ignore_index=True)
 
-stop_df = pd.DataFrame([
-  dict(group='ติ่มซำ รองท้อง (ทอด)', market='Export', customer='Ksiaa GmbH',         name='Tori Katsu',                   month='Jan', plan_type='นอกแผน', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
-  dict(group='เส้น (แป้งสาลี) ซุป',  market='PMA20',  customer='-',                  name='อุด้งหมูผัดกิมจิ 240g',        month='May', plan_type='นอกแผน', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
-  dict(group='ติ่มซำ รองท้อง (ทอด)', market='non-7',  customer='MAKRO',              name='ซาโมซ่าไส้เผือก',              month='Apr', plan_type='นอกแผน', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
-  dict(group='ติ่มซำ รองท้อง (ทอด)', market='non-7',  customer='MAKRO',              name='ซาโมซ่าไส้ครีมชีส',            month='Apr', plan_type='นอกแผน', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
-  dict(group='ติ่มซำ รองท้อง (ทอด)', market='non-7',  customer='MAKRO',              name='ซาโมซ่าไส้เผือกโมจิ',          month='Apr', plan_type='นอกแผน', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
-  dict(group='ติ่มซำ รองท้อง (ทอด)', market='non-7',  customer='MAKRO',              name='ซาโมซ่าไส้เผือกกล้วย',         month='Apr', plan_type='นอกแผน', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
-  dict(group='ติ่มซำ รองท้อง (ทอด)', market='Export', customer='Westbridge (TESCO)', name='Banana Cinnamon Parcel',        month='Apr', plan_type='นอกแผน', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
-  dict(group='ติ่มซำ รองท้อง (ทอด)', market='Export', customer='Westbridge (TESCO)', name='Tofu-Wrapped Prawn',            month='Apr', plan_type='นอกแผน', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
-  dict(group='ติ่มซำ รองท้อง (ทอด)', market='Export', customer='Westbridge (TESCO)', name='Mango Sticky Rice Spring Roll', month='Apr', plan_type='นอกแผน', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
-  dict(group='ติ่มซำ รองท้อง (ทอด)', market='Export', customer='Westbridge (TESCO)', name='Sesame Prawn Toast',            month='Apr', plan_type='นอกแผน', cause='Mer/ลูกค้าขอยกเลิก', reason='ราคา RM สูง ทำให้ราคาขายสูง'),
-])
-
-GROUP_LIST  = ['ติ่มซำ (นึ่ง)','ติ่มซำ รองท้อง (ทอด)','เบอร์เกอร์ รองท้อง',
-               'ข้าวเหนียว สเต็ก','ข้าวและกับข้าว','ข้าวปั้น เครื่องเคียง',
-               'กับข้าว','เส้น (ข้าวไทย)','เส้น (แป้งสาลี) ซุป','สลัด ยำ น้ำจิ้ม','อื่นๆ']
-MARKET_LIST = ['PMA08','PMA24','PMA19','PMA20','PMA02','PMA06','PMA16','PMA22','Export','non-7']
+stop_df = pd.DataFrame(STOP_PRODUCTS)
 
 # ── Header ───────────────────────────────────────────────────
 st.markdown("## 📊 RTE 2026 — Product Development Dashboard")
 st.caption("7-11 & Non 7-11 · ข้อมูล ณ เดือน พฤษภาคม 2026")
 st.divider()
 
-# ── Tabs ─────────────────────────────────────────────────────
+total_all = len(all_products)
+total_new = len(all_products[all_products['type'] == 'New'])
+total_lv  = len(all_products[all_products['type'] == 'Level Up'])
+
 tab1, tab2, tab3, tab4 = st.tabs([
     "📊 ภาพรวม",
-    f"📦 สินค้าทั้งหมด ({len(all_products)})",
-    "🛑 หยุดพัฒนา (10)",
+    f"📦 สินค้าทั้งหมด ({total_all})",
+    f"🛑 หยุดพัฒนา ({len(stop_df)})",
     "➕ เพิ่มสินค้าใหม่",
 ])
 
@@ -145,23 +190,20 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # TAB 1 — OVERVIEW
 # ════════════════════════════════════════
 with tab1:
-    total = len(all_products)
     k1, k2, k3, k4, k5 = st.columns(5)
-    k1.metric("สินค้าพัฒนาทั้งหมด", total,      "Jan–Apr 2026")
-    k2.metric("% Success New",       "100%",     "ขายได้ครบทุกตัว")
-    k3.metric("หยุดพัฒนานอกแผน",    "10",       "ส่วนใหญ่ Apr (+8)")
-    k4.metric("Delay Plan",          int(all_products['delay'].sum()), "Mar=2, Apr=2")
+    k1.metric("สินค้าพัฒนาทั้งหมด", total_all,     "Jan–Apr 2026")
+    k2.metric("% Success New",       "100%",        "ขายได้ครบทุกตัว")
+    k3.metric("หยุดพัฒนานอกแผน",    len(stop_df),  "ส่วนใหญ่ Apr (+8)")
+    k4.metric("Delay Plan",          int(all_products['delay'].sum()), "")
     k5.metric("ยอดขายสะสม",          f"{all_products['total_sales'].sum()/1e6:.0f}M บาท", "ณ เมษายน")
 
     st.divider()
 
-    # Row 1
     c1, c2 = st.columns(2)
     with c1:
         st.markdown("**Plan vs Sold New — รายเดือน**")
         p_vals = plan_new[:]
         s_vals = sold_new[:]
-        # Add new products to plan/sold count by month
         if st.session_state.extra_products:
             extra_df2 = pd.DataFrame(st.session_state.extra_products)
             for i, m in enumerate(MONTHS):
@@ -185,7 +227,6 @@ with tab1:
                            yaxis=dict(range=[0,120], ticksuffix="%"))
         st.plotly_chart(fig2, use_container_width=True)
 
-    # Row 2
     c3, c4 = st.columns(2)
     with c3:
         st.markdown("**ยอดขายสะสม (ล้านบาท) — รายเดือน**")
@@ -205,14 +246,13 @@ with tab1:
         fig4.update_layout(height=260, margin=dict(l=0,r=0,t=10,b=0), showlegend=False)
         st.plotly_chart(fig4, use_container_width=True)
 
-    # Row 3
     c5, c6, c7 = st.columns(3)
     with c5:
-        st.markdown("**Top กลุ่มสินค้า (Plan New)**")
-        grp_df = all_products.groupby('group').size().reset_index(name='plan').sort_values('plan')
-        fig5 = px.bar(grp_df, x='plan', y='group', orientation='h',
-                      color='plan', color_continuous_scale='Blues')
-        fig5.update_layout(height=300, margin=dict(l=0,r=0,t=10,b=0),
+        st.markdown("**Top กลุ่มสินค้า (จำนวนสินค้า)**")
+        grp_df = all_products.groupby('group').size().reset_index(name='count').sort_values('count')
+        fig5 = px.bar(grp_df, x='count', y='group', orientation='h',
+                      color='count', color_continuous_scale='Blues')
+        fig5.update_layout(height=320, margin=dict(l=0,r=0,t=10,b=0),
                            showlegend=False, coloraxis_showscale=False)
         st.plotly_chart(fig5, use_container_width=True)
 
@@ -223,18 +263,18 @@ with tab1:
             labels=mkt_df['market'], values=mkt_df['count'],
             hole=0.55, marker_colors=px.colors.qualitative.Set2
         ))
-        fig6.update_layout(height=300, margin=dict(l=0,r=0,t=10,b=0))
+        fig6.update_layout(height=320, margin=dict(l=0,r=0,t=10,b=0))
         st.plotly_chart(fig6, use_container_width=True)
 
     with c7:
         st.markdown("**New vs Level Up ตามตลาด**")
         nv = all_products[all_products['type']=='New'].groupby('market').size().reset_index(name='new')
-        lv = all_products[all_products['type']=='LevelUp'].groupby('market').size().reset_index(name='lv')
+        lv = all_products[all_products['type']=='Level Up'].groupby('market').size().reset_index(name='lv')
         mv = pd.merge(nv, lv, on='market', how='outer').fillna(0)
         fig7 = go.Figure()
         fig7.add_bar(x=mv['market'], y=mv['new'], name="New",      marker_color="#2563eb")
         fig7.add_bar(x=mv['market'], y=mv['lv'],  name="Level Up", marker_color="#0d9488")
-        fig7.update_layout(barmode="stack", height=300, margin=dict(l=0,r=0,t=10,b=0),
+        fig7.update_layout(barmode="stack", height=320, margin=dict(l=0,r=0,t=10,b=0),
                            legend=dict(orientation="h", y=1.1))
         st.plotly_chart(fig7, use_container_width=True)
 
@@ -242,7 +282,7 @@ with tab1:
 # TAB 2 — ALL PRODUCTS
 # ════════════════════════════════════════
 with tab2:
-    st.markdown("### 📦 สินค้าทั้งหมด")
+    st.markdown(f"### 📦 สินค้าทั้งหมด — New: {total_new} | Level Up: {total_lv}")
     col_f1, col_f2, col_f3, col_f4 = st.columns([3,2,2,2])
     with col_f1:
         search = st.text_input("🔍 ค้นหา", placeholder="ชื่อสินค้า / รหัส / กลุ่ม")
@@ -263,9 +303,9 @@ with tab2:
     if search:
         q = search.lower()
         filtered = filtered[
-            filtered['name'].str.lower().str.contains(q) |
-            filtered['group'].str.lower().str.contains(q) |
-            filtered['code'].str.lower().str.contains(q)
+            filtered['name'].str.lower().str.contains(q, na=False) |
+            filtered['group'].str.lower().str.contains(q, na=False) |
+            filtered['code'].str.lower().str.contains(q, na=False)
         ]
 
     st.caption(f"แสดง {len(filtered)} รายการ")
@@ -291,17 +331,19 @@ with tab2:
                     st.write(f"ไตรมาส: {row['quarter']} | เดือน: {row['month']}")
                     st.write(f"ประเภท: {row['type']}")
                 with d2:
-                    st.markdown("**Quality & Sales**")
+                    st.markdown("**Quality & Cost**")
                     st.write(f"%αβ: {row['alpha']}%")
                     st.write(f"%Defect: {row['defect']}%")
-                    st.write(f"%CM เกิดจริง: {row['cm']:.2f}%" if row['cm'] > 0 else "%CM: -")
+                    st.write(f"%CM ใบขอรหัส: {row['cm_request']:.2f}%")
+                    st.write(f"%CM เกิดจริง: {row['cm']:.2f}%" if row['cm'] > 0 else "%CM เกิดจริง: -")
                     st.write(f"Delay: {'⚠️ มี' if row['delay'] else '✅ ไม่มี'}")
                     total = row['total_sales']
                     st.write(f"ยอดขายรวม: {total/1e6:.2f}M บาท" if total > 0 else "ยอดขายรวม: -")
                 if row['total_sales'] > 0:
                     fig_s = go.Figure(go.Bar(
                         x=['Jan','Feb','Mar','Apr'],
-                        y=[row['sales_jan'],row['sales_feb'],row['sales_mar'],row['sales_apr']],
+                        y=[max(0, row['sales_jan']), max(0, row['sales_feb']),
+                           max(0, row['sales_mar']), max(0, row['sales_apr'])],
                         marker_color='#2563eb'
                     ))
                     fig_s.update_layout(title="ยอดขายรายเดือน (บาท)", height=200,
@@ -313,32 +355,33 @@ with tab2:
 # ════════════════════════════════════════
 with tab3:
     st.markdown("### 🛑 สินค้าหยุดพัฒนานอกแผน")
+
+    export_count = len(stop_df[stop_df['market'] == 'Export'])
+    non7_pma20   = len(stop_df[stop_df['market'].isin(['non-7','PMA20'])])
+
     s1, s2, s3, s4 = st.columns(4)
-    s1.metric("ทั้งหมด",        "10 รายการ")
-    s2.metric("นอกแผน",         "10 (100%)")
-    s3.metric("Export",         "5 รายการ")
-    s4.metric("non-7 / PMA20",  "5 รายการ")
+    s1.metric("ทั้งหมด",       f"{len(stop_df)} รายการ")
+    s2.metric("นอกแผน",        f"{len(stop_df)} (100%)")
+    s3.metric("Export",        f"{export_count} รายการ")
+    s4.metric("non-7 / PMA20", f"{non7_pma20} รายการ")
     st.divider()
 
     sc1, sc2 = st.columns(2)
     with sc1:
         st.markdown("**หยุดพัฒนาแยกตามกลุ่ม**")
-        fig_sg = px.bar(
-            x=[9, 1],
-            y=['ติ่มซำ รองท้อง (ทอด)', 'เส้น (แป้งสาลี) ซุป'],
-            orientation='h',
-            color=[9, 1],
-            color_continuous_scale=[[0,'#d97706'],[1,'#dc2626']]
-        )
+        sg = stop_df.groupby('group').size().reset_index(name='count').sort_values('count')
+        fig_sg = px.bar(sg, x='count', y='group', orientation='h',
+                        color='count', color_continuous_scale=[[0,'#d97706'],[1,'#dc2626']])
         fig_sg.update_layout(height=200, margin=dict(l=0,r=0,t=10,b=0),
                              showlegend=False, coloraxis_showscale=False)
         st.plotly_chart(fig_sg, use_container_width=True)
 
     with sc2:
         st.markdown("**หยุดพัฒนาแยกตามเดือน**")
+        sm = stop_df.groupby('month').size().reset_index(name='count')
         fig_sm = go.Figure(go.Pie(
-            labels=['Jan (1)','Apr (8)','May (1)'],
-            values=[1, 8, 1],
+            labels=sm['month'].apply(lambda m: f"{m} ({sm[sm['month']==m]['count'].values[0]})"),
+            values=sm['count'],
             hole=0.5,
             marker_colors=['#93c5fd','#dc2626','#d97706']
         ))
@@ -375,7 +418,7 @@ with tab4:
         p_market  = r4.selectbox("ตลาด *", MARKET_LIST)
         p_quarter = r5.selectbox("ไตรมาส", ['Q1','Q2','Q3','Q4'])
         p_month   = r6.selectbox("เดือน *", MONTHS)
-        p_type    = r7.selectbox("ประเภท *", ['New','LevelUp'])
+        p_type    = r7.selectbox("ประเภท *", ['New','Level Up'])
 
         st.markdown("**🧪 Quality**")
         q1, q2, q3, q4 = st.columns(4)
@@ -385,29 +428,31 @@ with tab4:
         p_delay  = q4.checkbox("Delay Plan")
 
         st.markdown("**💰 ยอดขาย (บาท)**")
-        s1, s2, s3, s4 = st.columns(4)
-        p_sjan = s1.number_input("Jan", 0, step=1000)
-        p_sfeb = s2.number_input("Feb", 0, step=1000)
-        p_smar = s3.number_input("Mar", 0, step=1000)
-        p_sapr = s4.number_input("Apr", 0, step=1000)
+        s1c, s2c, s3c, s4c = st.columns(4)
+        p_sjan = s1c.number_input("Jan", 0, step=1000)
+        p_sfeb = s2c.number_input("Feb", 0, step=1000)
+        p_smar = s3c.number_input("Mar", 0, step=1000)
+        p_sapr = s4c.number_input("Apr", 0, step=1000)
 
         if st.form_submit_button("✅ บันทึกสินค้า", type="primary", use_container_width=True):
             if not p_code or not p_name:
                 st.error("กรุณากรอก รหัสสินค้า และ ชื่อสินค้า")
             else:
                 existing = st.session_state.extra_products
-                new_no = max(p['no'] for p in existing) + 1 if existing else 46
+                all_nos = [p.get('no', 0) for p in BASE_PRODUCTS] + [p.get('no', 0) for p in existing]
+                new_no = max(all_nos) + 1 if all_nos else 77
                 entry = dict(
                     no=new_no, group=p_group, market=p_market,
                     quarter=p_quarter, month=p_month, code=p_code,
-                    name=p_name, type=p_type, cm=p_cm, alpha=p_alpha,
+                    name=p_name, type=p_type, cm=p_cm,
+                    cm_request=p_cm, alpha=p_alpha,
                     defect=p_defect, delay=p_delay,
                     sales_jan=p_sjan, sales_feb=p_sfeb,
                     sales_mar=p_smar, sales_apr=p_sapr,
                 )
                 st.session_state.extra_products.append(entry)
                 save_extra(st.session_state.extra_products)
-                st.success(f"✅ เพิ่ม **{p_name}** เรียบร้อย! ข้อมูลขึ้น Dashboard อัตโนมัติ")
+                st.success(f"✅ เพิ่ม **{p_name}** เรียบร้อย!")
                 st.balloons()
                 st.rerun()
 
